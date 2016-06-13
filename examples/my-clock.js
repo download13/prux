@@ -1,9 +1,11 @@
+/** @jsx h */
 import 'document-register-element';
-import {registerComponent, h} from '../register-component';
+import {registerComponent} from '../build/src/register-component';
 
 
-registerComponent('my-simple', ({props}) =><div>H: {props.test}</div>);
+registerComponent('my-simple', ({props, h}) => <div g="f">H: {props.test}</div>);
 
+/*
 registerComponent('my-clock', {
 	onMount({update}) {
 		const refreshTime = () => update('SET_TIME', Date.now());
@@ -47,3 +49,4 @@ registerComponent('my-counter', {
 		return state;
 	}
 });
+*/

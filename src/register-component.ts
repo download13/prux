@@ -1,124 +1,126 @@
 import {h, updateChildren} from 'update-element-children';
+import * as assign from 'object-assign';
+import {
+	ComponentSpec,
+	ComponentSpecObject,
+	CustomElementPrototype,
+	ComponentMembers,
+	Model,
+	RenderModel
+} from './types';
 
 
-export function registerComponent(name, spec, doc = document) {
+export function registerComponent(name: string, spec: ComponentSpec = {}, doc = document): Function {
+	if(typeof spec === 'function') {
+		spec = {render: spec};
+	}
+
 	return doc.registerElement(name, {
-		prototype: Object.create(
-			HTMLElement.prototype,
-			createComponentPrototype(spec)
-		)
+		prototype: createComponentPrototype({
+			render: spec.render || nop,
+			reduce: spec.reduce || nop,
+			onMount: spec.onMount || nop,
+			onUnmount: spec.onUnmount || nop,
+			onPropChange: spec.onPropChange || nop
+		})
 	});
 }
 
 // TODO: Use Shadow DOM if available
-function createComponentPrototype(spec = {}) {
-	if(typeof spec === 'function') {
-		spec = {render: spec};
-	}
-	const reduce = spec.reduce || nop;
-	const render = spec.render || nop;
-
-	function model(self) {
-		const props = self._props;
-		const state = self._state;
-
-		return {
-			props,
-			state,
-			update(type, payload) {
-				self._state = reduce(state, {type, payload});
-				queueRender(self);
-			}
-		};
-	}
-
-	function queueRender(self) {
-		if(!self._renderPending) {
-			self._renderPending = true;
-			doLater(doRender, self);
-		}
-	}
-
-	function doRender(self) {
-		if(!self._renderPending) return;
-		const newRender = render(model(self));
-
-		if(self._lastRender) {
-			patch(self, diff(self._lastRender, newRender));
-			console.log('patch', self._lastRender, newRender)
-		} else {
-			self.appendChild(newRender.render());
-		}
-
-		self._lastRender = newRender;
-		self._renderPending = false;
-	}
-
-
-	const elementPrototype = {
-		_renderPending: {
-			enumerable: false,
-			writable: true
-		},
-		_lastRender: {
-			enumerable: false,
-			writable: true
-		},
-		_props: {
-			enumerable: false,
-			writable: true
-		},
-		_state: {
-			enumerable: false,
-			writable: true
-		},
-		createdCallback: {
-			value() {
-				this._renderPending = false;
-				this._lastRender = null;
-				this._props = attributesToProps(this.attributes);
-				this._state = reduce(undefined, {type: '_#@init_action'});
-				queueRender(this);
-			},
-			enumerable: false
-		},
-		attributeChangedCallback: {
-			value(name, previousValue, value) {
-				this._props = {
-					...this._props,
-					[name]: value
-				};
-				if(spec.onPropsChange) {
-					spec.onPropsChange(model(this));
-				}
-				queueRender(this);
-			},
-			enumerable: false
-		}
-	};
-	if(spec.onMount) {
-		elementPrototype.attachedCallback = {
-			value() {
-				console.log('onMount', this._props);
-				spec.onMount(model(this));
-			},
-			enumerable: false
-		};
-	}
-	if(spec.onUnmount) {
-		elementPrototype.detachedCallback = {
-			value() {
-				console.log('onUnmount', this);
-				spec.onUnmount(model(this));
-			},
-			enumerable: false
-		};
-	}
-
-	return elementPrototype;
+function createComponentPrototype(spec: ComponentSpecObject): CustomElementPrototype {
+	const proto = <CustomElementPrototype> assign({}, HTMLComponent.prototype);
+	proto._spec = spec;
+	return proto;
 }
 
-function attributesToProps(attributes) {
+class HTMLComponent extends HTMLElement implements CustomElementPrototype {
+	_spec: ComponentSpecObject;
+	_component:  ComponentMembers;
+
+	createdCallback() {window.d=this;
+		const {reduce} = this._spec;
+
+		this._doRender = this._doRender.bind(this);
+
+		this._component = {
+			renderPending: false,
+			previousRender: null,
+			props: attributesToProps(this.attributes),
+			state: reduce(undefined, {type: '_#@init_action'})
+		};
+
+		this._queueRender();
+	}
+
+	attributeChangedCallback(name, previousValue, value) {
+		const c = this._component;
+		const {onPropChange} = this._spec;
+
+		c.props = assign({}, c.props, {[name]: value});
+		onPropChange(this._createModel(), name, previousValue, value);
+		this._queueRender();
+	}
+
+	attachedCallback() {
+		const c = this._component;
+		const {onMount} = this._spec;
+
+		onMount(this._createModel());
+	}
+
+	detachedCallback() {
+		const c = this._component;
+		const {onUnmount} = this._spec;
+
+		onUnmount(this._createModel());
+	}
+
+	_queueRender(): void {
+		const c = this._component;
+		if(!c.renderPending) {
+			c.renderPending = true;
+			doLater(this._doRender);
+		}
+	}
+
+	_doRender(): void {
+		const c = this._component;
+		if(!c.renderPending) return;
+
+		const {render} = this._spec;
+		const currentRender = render(this._createRenderModel());
+
+		console.log('updateChildren', c.previousRender, currentRender);
+		updateChildren(this, c.previousRender, currentRender);
+
+		c.previousRender = currentRender;
+		c.renderPending = false;
+	}
+
+	_createModel(): Model {
+		const c = this._component;
+		const {reduce} = this._spec;
+
+		return {
+			props: c.props,
+			state: c.state,
+			update: (type, payload) => {
+				c.state = reduce(c.state, {type, payload});
+				this._queueRender();
+				return c.state;
+			},
+			h
+		};
+	}
+
+	_createRenderModel(): RenderModel {
+		const model = this._createModel();
+		model.h = h;
+		return model;
+	}
+}
+
+function attributesToProps(attributes: NamedNodeMap): Object {
 	const props = {};
 	for(let attr of attributes) {
 		props[attr.name] = attr.value;
@@ -126,7 +128,7 @@ function attributesToProps(attributes) {
 	return props;
 }
 
-function nop() {}
+function nop(): void {}
 
 function doLater(fn, ...args) {
 	if(setImmediate) setImmediate(fn, ...args);
