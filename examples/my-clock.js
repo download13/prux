@@ -1,23 +1,18 @@
 /** @jsx h */
 import 'document-register-element';
-import {registerComponent} from '../build/src/register-component';
+import {registerComponent} from '../src';
 
 
-registerComponent('my-simple', ({props, h}) => <div g="f">H: {props.test}</div>);
+registerComponent('my-simple', ({props, h}) => <div g="f">Simple Attr: {props.test}</div>);
 
-/*
 registerComponent('my-clock', {
 	onMount({update}) {
 		const refreshTime = () => update('SET_TIME', Date.now());
 		update('SET_INTERVAL', setInterval(refreshTime, 1000));
 		refreshTime();
 	},
-	render({state}) {
-		const timeStr = new Date(state.time).toLocaleTimeString();
-		return <div>
-			<div>Header</div>
-			<div>{timeStr}</div>
-		</div>;
+	render({h, state}) {
+		return new Date(state.time).toLocaleTimeString();
 	},
 	reduce(state = {
 		time: 0,
@@ -33,20 +28,14 @@ registerComponent('my-clock', {
 });
 
 registerComponent('my-counter', {
-	render({state, update}) {
+	render({h, state, update}) {
 		return <div>
-			<span>Counter: {state.count}</span>{' '}
-			<button onClick={() => update('INCREMENT')}>Increment</button>
+			<span>Counter: {state} </span>
+			<button onclick={() => update('INCREMENT')}>Increment</button>
 		</div>;
 	},
-	reduce(state = {
-		count: 0
-	}, {type, payload}) {
-		if(type === 'INCREMENT') return {
-			...state,
-			count: state.count + 1
-		};
+	reduce(state = 0, {type, payload}) {
+		if(type === 'INCREMENT') return state + 1;
 		return state;
 	}
 });
-*/
