@@ -23,9 +23,9 @@ module.exports = [
 		}
 	},
 	{
-		entry: __dirname + '/examples/my-clock.js',
+		entry: __dirname + '/example/my-clock.js',
 		output: {
-			path: __dirname + '/examples',
+			path: __dirname + '/example',
 			filename: 'my-clock.build.js'
 		},
 		module: {
