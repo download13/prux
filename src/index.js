@@ -53,6 +53,7 @@ function createComponentPrototype(spec) {
 		const {reduce} = spec;
 
 		return {
+			root: element,
 			props: c.props,
 			state: c.state,
 			update: (type, payload) => {
