@@ -81,7 +81,7 @@ registerComponent('my-clock', {
 * name - string; Tag name to be registered. Must contain a dash (-).
 * spec - function | object; If function, it will be treated as {render: spec}.
 
-### spec
+### spec - {...}
 
 * onMount(model) - function; Called when the component is mounted.
 * onUnmount(model) - function; Called when the component is unmounted.
@@ -89,7 +89,7 @@ registerComponent('my-clock', {
 * render(model) - function; Returns one or more vnodes to be used as children of the root element.
 * reduce(state, {type, payload}) - function; Takes a state and action, returns a new state.
 
-### model
+### model - {...}
 
 * root - HTMLElement; The root element of this component instance.
 * h(name, props, ...children) - function; Take as an argument in any function where you use JSX.
