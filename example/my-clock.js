@@ -5,6 +5,19 @@ import {registerComponent} from '../src';
 
 registerComponent('my-simple', ({props, h}) => <div g="f">Simple Attr: {props.test}</div>);
 
+registerComponent('my-counter', {
+	render({h, state, update}) {
+		return <div>
+			<span>Counter: {state} </span>
+			<button onclick={() => update('INCREMENT')}>Increment</button>
+		</div>;
+	},
+	reduce(state = 0, {type, payload}) {
+		if(type === 'INCREMENT') return state + 1;
+		return state;
+	}
+});
+
 registerComponent('my-clock', {
 	onMount({update}) {
 		const refreshTime = () => update('SET_TIME', Date.now());
@@ -24,18 +37,5 @@ registerComponent('my-clock', {
 	},
 	onUnmount({state}) {
 		clearInterval(state.interval);
-	}
-});
-
-registerComponent('my-counter', {
-	render({h, state, update}) {
-		return <div>
-			<span>Counter: {state} </span>
-			<button onclick={() => update('INCREMENT')}>Increment</button>
-		</div>;
-	},
-	reduce(state = 0, {type, payload}) {
-		if(type === 'INCREMENT') return state + 1;
-		return state;
 	}
 });

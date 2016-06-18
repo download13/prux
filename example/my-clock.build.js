@@ -416,47 +416,11 @@
 		);
 	});
 
-	__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__src__["a" /* registerComponent */])('my-clock', {
-		onMount: function onMount(_ref2) {
-			var update = _ref2.update;
-
-			var refreshTime = function refreshTime() {
-				return update('SET_TIME', Date.now());
-			};
-			update('SET_INTERVAL', setInterval(refreshTime, 1000));
-			refreshTime();
-		},
-		render: function render(_ref3) {
-			var h = _ref3.h;
-			var state = _ref3.state;
-
-			return new Date(state.time).toLocaleTimeString();
-		},
-		reduce: function reduce() {
-			var state = arguments.length <= 0 || arguments[0] === undefined ? {
-				time: 0,
-				interval: null
-			} : arguments[0];
-			var _ref4 = arguments[1];
-			var type = _ref4.type;
-			var payload = _ref4.payload;
-
-			if (type === 'SET_TIME') return _extends({}, state, { time: payload });
-			if (type === 'SET_INTERVAL') return _extends({}, state, { interval: payload });
-			return state;
-		},
-		onUnmount: function onUnmount(_ref5) {
-			var state = _ref5.state;
-
-			clearInterval(state.interval);
-		}
-	});
-
 	__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__src__["a" /* registerComponent */])('my-counter', {
-		render: function render(_ref6) {
-			var h = _ref6.h;
-			var state = _ref6.state;
-			var update = _ref6.update;
+		render: function render(_ref2) {
+			var h = _ref2.h;
+			var state = _ref2.state;
+			var update = _ref2.update;
 
 			return h(
 				'div',
@@ -479,12 +443,48 @@
 		},
 		reduce: function reduce() {
 			var state = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-			var _ref7 = arguments[1];
-			var type = _ref7.type;
-			var payload = _ref7.payload;
+			var _ref3 = arguments[1];
+			var type = _ref3.type;
+			var payload = _ref3.payload;
 
 			if (type === 'INCREMENT') return state + 1;
 			return state;
+		}
+	});
+
+	__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__src__["a" /* registerComponent */])('my-clock', {
+		onMount: function onMount(_ref4) {
+			var update = _ref4.update;
+
+			var refreshTime = function refreshTime() {
+				return update('SET_TIME', Date.now());
+			};
+			update('SET_INTERVAL', setInterval(refreshTime, 1000));
+			refreshTime();
+		},
+		render: function render(_ref5) {
+			var h = _ref5.h;
+			var state = _ref5.state;
+
+			return new Date(state.time).toLocaleTimeString();
+		},
+		reduce: function reduce() {
+			var state = arguments.length <= 0 || arguments[0] === undefined ? {
+				time: 0,
+				interval: null
+			} : arguments[0];
+			var _ref6 = arguments[1];
+			var type = _ref6.type;
+			var payload = _ref6.payload;
+
+			if (type === 'SET_TIME') return _extends({}, state, { time: payload });
+			if (type === 'SET_INTERVAL') return _extends({}, state, { interval: payload });
+			return state;
+		},
+		onUnmount: function onUnmount(_ref7) {
+			var state = _ref7.state;
+
+			clearInterval(state.interval);
 		}
 	});
 
