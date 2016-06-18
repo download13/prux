@@ -29,6 +29,15 @@ registerComponent(
 );
 ```
 
+### Use the component
+
+```html
+<!doctype html>
+<body>
+	<my-simple test="testvalue"></my-simple>
+</body>
+```
+
 ### Stateful component
 
 ```javascript
