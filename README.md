@@ -10,8 +10,69 @@ npm install prux
 
 ## Examples
 
-TODO
+### Stateless functional component
 
+```javascript
+/** @jsx h */
+import {registerComponent} from 'prux';
+
+registerComponent(
+	'my-simple',
+	({h, props}) => // h is the JSX helper
+		<div>Props test value: {props.test}</div>
+);
+// The above is equivalent to:
+registerComponent(
+	'my-simple',
+	({h, props}) =>
+		h('div', {}, 'Props test value: ', props.test);
+);
+```
+
+### Stateful component
+
+```javascript
+registerComponent('my-counter', {
+	render({h, state, update}) {
+		return <div>
+			<span>Counter: {state} </span>
+			<button onClick={() => update('INCREMENT')}>Increment</button>
+		</div>;
+	},
+	reduce(state = 0, {type, payload}) {
+		if(type === 'INCREMENT') return state + 1;
+		return state;
+	}
+});
+```
+
+### Lifecycle component
+
+```javascript
+registerComponent('my-clock', {
+	onMount({update}) {
+		const refreshTime = () => update('SET_TIME', Date.now());
+		update('SET_INTERVAL', setInterval(refreshTime, 1000));
+		refreshTime();
+	},
+	render({h, state}) {
+		// Returns a string, which counts as a child
+		return new Date(state.time).toLocaleTimeString();
+	},
+	reduce(state = {
+		time: 0,
+		interval: null
+	}, {type, payload}) {
+		if(type === 'SET_TIME') return {...state, time: payload};
+		if(type === 'SET_INTERVAL') return {...state, interval: payload};
+		return state;
+	},
+	onUnmount({state}) {
+		// Cleanup
+		clearInterval(state.interval);
+	}
+});
+```
 
 ## API
 
@@ -25,7 +86,7 @@ TODO
 * onMount(model) - function; Called when the component is mounted.
 * onUnmount(model) - function; Called when the component is unmounted.
 * onPropChange(model, name, oldValue, value) - function; Called when a prop is changed on the component.
-* render(model) - function; Returns a vnode structure to be replicated on the DOM.
+* render(model) - function; Returns one or more vnodes to be used as children of the root element.
 * reduce(state, {type, payload}) - function; Takes a state and action, returns a new state.
 
 ### model
