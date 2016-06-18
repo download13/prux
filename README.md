@@ -18,7 +18,7 @@ TODO
 ### registerComponent(name, spec);
 
 * name - string; Tag name to be registered. Must contain a dash (-).
-* spec - function | object; If function, it will be treated as {render: function}.
+* spec - function | object; If function, it will be treated as {render: spec}.
 
 ### spec
 
