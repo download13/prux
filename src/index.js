@@ -26,6 +26,7 @@ export function registerComponent(name, spec = {}, doc = document) {
 }
 
 // TODO: Use Shadow DOM if available
+// Children don't make sense until the shadow dom is in place
 function createComponentPrototype(spec) {
 	function queueRender(element) {
 		const c = element._component;
