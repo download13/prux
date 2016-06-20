@@ -3,6 +3,8 @@ import nop from 'nop';
 import {h, updateChildren} from 'update-element-children';
 
 
+export {h};
+
 export function registerComponent(name, spec = {}, doc = document) {
 	if(typeof spec === 'function') {
 		spec = {render: spec};
