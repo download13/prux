@@ -3,7 +3,12 @@ import 'document-register-element';
 import {registerComponent} from '../src';
 
 
-registerComponent('my-simple', ({props, h}) => <div g="f">Simple Attr: {props.test}</div>);
+registerComponent('my-simple', {
+	props: {test: ''},
+	render({props, h}) {
+		return <div g="f">Simple Attr: {props.test}</div>;
+	}
+});
 
 registerComponent('my-counter', {
 	render({h, state, update}) {
