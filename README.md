@@ -18,17 +18,19 @@ npm install prux
 /** @jsx h */
 import {registerComponent} from 'prux';
 
-registerComponent(
-	'my-simple',
-	({h, props}) => // h is the JSX helper
-		<div>Props test value: {props.test}</div>
-);
+registerComponent('my-simple', {
+	props: {test: ''},
+	render({h, props}) { // h is the JSX helper
+		return <div>Props test value: {props.test}</div>;
+	}
+});
 // The above is equivalent to:
-registerComponent(
-	'my-simple',
-	({h, props}) =>
-		h('div', {}, 'Props test value: ', props.test);
-);
+registerComponent('my-simple', {
+	props: {test: ''},
+	render({h, props}) {
+		return h('div', {}, 'Props test value: ', props.test);
+	}
+});
 ```
 
 ### Use the component
@@ -85,7 +87,6 @@ registerComponent('my-clock', {
 });
 ```
 
-
 ## API
 
 ### registerComponent(name, spec);
@@ -95,6 +96,7 @@ registerComponent('my-clock', {
 
 ### spec - {...}
 
+* props - object; Map of prop names to their default values.
 * onMount(model) - function; Called when the component is mounted.
 * onUnmount(model) - function; Called when the component is unmounted.
 * onPropChange(model, name, oldValue, value) - function; Called when a prop is changed on the component.
@@ -108,3 +110,7 @@ registerComponent('my-clock', {
 * state - any; The current state of the component.
 * props - object; The props given to this component.
 * update(type[, payload]) - function; Call this to dispatch an action to the reducer and update the component state.
+
+## Notes
+
+* When attributes are set on the element, if a prop of the same name exists it will be set to the string or number value of the attribute.
