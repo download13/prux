@@ -4,7 +4,8 @@
   "description": "Web Components with reducible state and functional views",
   "main": "dist/index.js",
   "directories": {
-    "example": "example"
+    "example": "example",
+    "test": "test"
   },
   "devDependencies": {
     "babel-core": "^6.9.1",
