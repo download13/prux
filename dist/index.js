@@ -53,14 +53,14 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(9).nextTick;
+	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(10).nextTick;
 	var apply = Function.prototype.apply;
 	var slice = Array.prototype.slice;
 	var immediateIds = {};
@@ -237,6 +237,22 @@ module.exports =
 /* 4 */
 /***/ function(module, exports) {
 
+	module.exports = function (object, cb, context) {
+	  var newObject = {}
+	  for (var key in object) {
+	    if (!object.hasOwnProperty(key)) {
+	      continue;
+	    }
+	    newObject[key] = cb.call(context, object[key], key, object);
+	  }
+	  return newObject;
+	}
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
 	var global = (function(){return this}());
 	module.exports = function () {
 	  global.setImmediate = global.setImmediate || function () {
@@ -247,37 +263,46 @@ module.exports =
 	}
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	"use strict";
-	var update_dom_1 = __webpack_require__(10);
+	var update_dom_1 = __webpack_require__(11);
 	exports.updateChildren = update_dom_1.updateChildren;
 	var h_1 = __webpack_require__(1);
 	exports.h = h_1.h;
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	/* WEBPACK VAR INJECTION */(function(setImmediate) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_setimmediate_min__ = __webpack_require__(4);
+	/* WEBPACK VAR INJECTION */(function(setImmediate) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_setimmediate_min__ = __webpack_require__(5);
 	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_setimmediate_min___default = __WEBPACK_IMPORTED_MODULE_0_setimmediate_min__ && __WEBPACK_IMPORTED_MODULE_0_setimmediate_min__.__esModule ? function() { return __WEBPACK_IMPORTED_MODULE_0_setimmediate_min__['default'] } : function() { return __WEBPACK_IMPORTED_MODULE_0_setimmediate_min__; };
 	/* harmony import */ __webpack_require__.d(__WEBPACK_IMPORTED_MODULE_0_setimmediate_min___default, 'a', __WEBPACK_IMPORTED_MODULE_0_setimmediate_min___default);
 	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_nop__ = __webpack_require__(3);
 	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_nop___default = __WEBPACK_IMPORTED_MODULE_1_nop__ && __WEBPACK_IMPORTED_MODULE_1_nop__.__esModule ? function() { return __WEBPACK_IMPORTED_MODULE_1_nop__['default'] } : function() { return __WEBPACK_IMPORTED_MODULE_1_nop__; };
 	/* harmony import */ __webpack_require__.d(__WEBPACK_IMPORTED_MODULE_1_nop___default, 'a', __WEBPACK_IMPORTED_MODULE_1_nop___default);
-	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_update_element_children__ = __webpack_require__(5);
+	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_update_element_children__ = __webpack_require__(6);
 	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_update_element_children___default = __WEBPACK_IMPORTED_MODULE_2_update_element_children__ && __WEBPACK_IMPORTED_MODULE_2_update_element_children__.__esModule ? function() { return __WEBPACK_IMPORTED_MODULE_2_update_element_children__['default'] } : function() { return __WEBPACK_IMPORTED_MODULE_2_update_element_children__; };
 	/* harmony import */ __webpack_require__.d(__WEBPACK_IMPORTED_MODULE_2_update_element_children___default, 'a', __WEBPACK_IMPORTED_MODULE_2_update_element_children___default);
+	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_object_map__ = __webpack_require__(4);
+	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_object_map___default = __WEBPACK_IMPORTED_MODULE_3_object_map__ && __WEBPACK_IMPORTED_MODULE_3_object_map__.__esModule ? function() { return __WEBPACK_IMPORTED_MODULE_3_object_map__['default'] } : function() { return __WEBPACK_IMPORTED_MODULE_3_object_map__; };
+	/* harmony import */ __webpack_require__.d(__WEBPACK_IMPORTED_MODULE_3_object_map___default, 'a', __WEBPACK_IMPORTED_MODULE_3_object_map___default);
 	/* harmony export */ exports["registerComponent"] = registerComponent;var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
 
+
+
+
+	/* harmony reexport */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_2_update_element_children__, "h")) __webpack_require__.d(exports, "h", function() { return __WEBPACK_IMPORTED_MODULE_2_update_element_children__["h"]; });
 
 
 	function registerComponent(name) {
@@ -289,6 +314,7 @@ module.exports =
 		}
 
 		var componentProto = createComponentPrototype({
+			props: spec.props || {},
 			render: spec.render || __WEBPACK_IMPORTED_MODULE_1_nop___default.a,
 			reduce: spec.reduce || __WEBPACK_IMPORTED_MODULE_1_nop___default.a,
 			onMount: spec.onMount,
@@ -301,7 +327,13 @@ module.exports =
 	}
 
 	// TODO: Use Shadow DOM if available
+	// Children don't make sense until the shadow dom is in place
 	function createComponentPrototype(spec) {
+		var render = spec.render;
+		var reduce = spec.reduce;
+		var onPropChange = spec.onPropChange;
+
+
 		function queueRender(element) {
 			var c = element._component;
 
@@ -317,8 +349,6 @@ module.exports =
 			var c = element._component;
 			if (!c.renderPending) return;
 
-			var render = spec.render;
-
 			var currentRender = render(createModel(element));
 
 			// console.log('updateChildren', c.previousRender, currentRender);
@@ -328,52 +358,109 @@ module.exports =
 			c.renderPending = false;
 		}
 
-		function createModel(element) {
-			var c = element._component;
-			var reduce = spec.reduce;
-
+		function createModel(componentElement) {
+			var c = componentElement._component;
 
 			return {
-				root: element,
+				root: componentElement,
 				props: c.props,
 				state: c.state,
 				update: function update(type, payload) {
 					c.state = reduce(c.state, { type: type, payload: payload });
-					queueRender(element);
+					queueRender(componentElement);
 					return c.state;
 				},
 				h: __WEBPACK_IMPORTED_MODULE_2_update_element_children__["h"]
 			};
 		}
 
+		// TODO: take spec.props and create a setter for each one that changes our props
+		// A setter only sets if the type is the same as the existing property
 		var proto = {
 			createdCallback: function createdCallback() {
-				var reduce = spec.reduce;
+				var initialProps = spec.props;
 
 
-				this._component = {
+				var c = this._component = {
 					renderPending: false,
 					previousRender: null,
-					props: attributesToProps(this.attributes),
+					initialProps: initialProps,
+					props: initialProps,
 					state: reduce(undefined, { type: '_#@init_action' })
 				};
 
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
+
+				try {
+					for (var _iterator = this.attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var attr = _step.value;
+
+						var name = attr.name;
+						var _previousValue = c.props[name];
+						var newValue = attr.value;
+						this.attributeChangedCallback(name, _previousValue, newValue);
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
+				}
+
 				queueRender(this);
 			},
-			attributeChangedCallback: function attributeChangedCallback(name, previousValue, value) {
+			attributeChangedCallback: function attributeChangedCallback(name, previousValue, newValue) {
+				// TODO: Test for this new behavior
 				var c = this._component;
-				var onPropChange = spec.onPropChange;
-
-
-				c.props = _extends({}, c.props, _defineProperty({}, name, value));
+				var typeOfPreviousProp = _typeof(c.props[name]);
+				if (typeOfPreviousProp === 'string') {
+					c.props = _extends({}, c.props, _defineProperty({}, name, newValue));
+				} else if (typeOfPreviousProp === 'number') {
+					var numericalValue = parseFloat(newValue);
+					if (!isNaN(numericalValue)) {
+						c.props = _extends({}, c.props, _defineProperty({}, name, numericalValue));
+					}
+				}
 
 				if (onPropChange) {
-					onPropChange(createModel(this), name, previousValue, value);
+					onPropChange(createModel(this), name, previousValue, newValue);
 				}
 
 				queueRender(this);
 			}
 		};
+		// TODO: Add tests to ensure that these prop setters work
+		// set when correct type
+		// don't set when not
+		// take initial values
+		Object.defineProperties(proto, __WEBPACK_IMPORTED_MODULE_3_object_map___default()(spec.props, function (_, name) {
+			return {
+				get: function get() {
+					this._component.props[name];
+				},
+				set: function set(newValue) {
+					var c = this._component;
+					var oldValue = c.props[name];
+					if ((typeof oldValue === 'undefined' ? 'undefined' : _typeof(oldValue)) === (typeof newValue === 'undefined' ? 'undefined' : _typeof(newValue)) && newValue !== oldValue) {
+						c.props[name] = newValue;
+						if (onPropChange) {
+							onPropChange(createModel(this), name, previousValue, newValue);
+						}
+						queueRender(this);
+					}
+				}
+			};
+		}));
 
 		if (spec.onMount) {
 			proto.attachedCallback = function () {
@@ -392,27 +479,27 @@ module.exports =
 
 	function attributesToProps(attributes) {
 		var props = {};
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
+		var _iteratorNormalCompletion2 = true;
+		var _didIteratorError2 = false;
+		var _iteratorError2 = undefined;
 
 		try {
-			for (var _iterator = attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				var attr = _step.value;
+			for (var _iterator2 = attributes[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+				var attr = _step2.value;
 
 				props[attr.name] = attr.value;
 			}
 		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
+			_didIteratorError2 = true;
+			_iteratorError2 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
+				if (!_iteratorNormalCompletion2 && _iterator2.return) {
+					_iterator2.return();
 				}
 			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
+				if (_didIteratorError2) {
+					throw _iteratorError2;
 				}
 			}
 		}
@@ -422,7 +509,7 @@ module.exports =
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).setImmediate))
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -476,7 +563,7 @@ module.exports =
 	exports.getBit = getBit;
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -487,7 +574,7 @@ module.exports =
 	});
 	exports.REMOVE = exports.MOVE = exports.UPDATE = exports.CREATE = undefined;
 
-	var _bitVector = __webpack_require__(7);
+	var _bitVector = __webpack_require__(8);
 
 	/**
 	 * Actions
@@ -640,7 +727,7 @@ module.exports =
 	exports.REMOVE = REMOVE;
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -745,13 +832,13 @@ module.exports =
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	"use strict";
-	var dift_1 = __webpack_require__(8);
-	var util_1 = __webpack_require__(11);
+	var dift_1 = __webpack_require__(9);
+	var util_1 = __webpack_require__(12);
 	var h_1 = __webpack_require__(1);
 	var types_1 = __webpack_require__(2);
 	function updateChildren(parentNode, oldChildren, newChildren) {
@@ -862,7 +949,7 @@ module.exports =
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
