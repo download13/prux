@@ -1,6 +1,7 @@
 import 'setimmediate-min';
 import nop from 'nop';
 import {h, updateChildren} from 'update-element-children';
+import objectMap from 'object-map';
 
 
 export {h};
@@ -11,6 +12,7 @@ export function registerComponent(name, spec = {}, doc = document) {
 	}
 
 	const componentProto = createComponentPrototype({
+		props: spec.props || {},
 		render: spec.render || nop,
 		reduce: spec.reduce || nop,
 		onMount: spec.onMount,
@@ -28,6 +30,12 @@ export function registerComponent(name, spec = {}, doc = document) {
 // TODO: Use Shadow DOM if available
 // Children don't make sense until the shadow dom is in place
 function createComponentPrototype(spec) {
+	const {
+		render,
+		reduce,
+		onPropChange
+	} = spec;
+
 	function queueRender(element) {
 		const c = element._component;
 
@@ -41,7 +49,6 @@ function createComponentPrototype(spec) {
 		const c = element._component;
 		if(!c.renderPending) return;
 
-		const {render} = spec;
 		const currentRender = render(createModel(element));
 
 		// console.log('updateChildren', c.previousRender, currentRender);
@@ -51,52 +58,95 @@ function createComponentPrototype(spec) {
 		c.renderPending = false;
 	}
 
-	function createModel(element) {
-		const c = element._component;
-		const {reduce} = spec;
+	function createModel(componentElement) {
+		const c = componentElement._component;
 
 		return {
-			root: element,
+			root: componentElement,
 			props: c.props,
 			state: c.state,
 			update: (type, payload) => {
 				c.state = reduce(c.state, {type, payload});
-				queueRender(element);
+				queueRender(componentElement);
 				return c.state;
 			},
 			h
 		};
 	}
 
+	// TODO: take spec.props and create a setter for each one that changes our props
+	// A setter only sets if the type is the same as the existing property
 	const proto = {
 		createdCallback() {
-			const {reduce} = spec;
+			const {
+				props: initialProps
+			} = spec;
 
-			this._component = {
+			const c = this._component = {
 				renderPending: false,
 				previousRender: null,
-				props: attributesToProps(this.attributes),
+				initialProps,
+				props: initialProps,
 				state: reduce(undefined, {type: '_#@init_action'})
 			};
 
+			for(let attr of this.attributes) {
+				const name = attr.name;
+				const previousValue = c.props[name];
+				const newValue = attr.value;
+				this.attributeChangedCallback(name, previousValue, newValue);
+			}
+
 			queueRender(this);
 		},
-		attributeChangedCallback(name, previousValue, value) {
+		attributeChangedCallback(name, previousValue, newValue) {
+			// TODO: Test for this new behavior
 			const c = this._component;
-			const {onPropChange} = spec;
-
-			c.props = {
-				...c.props,
-				[name]: value
-			};
+			const typeOfPreviousProp = typeof c.props[name];
+			if(typeOfPreviousProp === 'string') {
+				c.props = {
+					...c.props,
+					[name]: newValue
+				};
+			} else if(typeOfPreviousProp === 'number') {
+				const numericalValue = parseFloat(newValue);
+				if(!isNaN(numericalValue)) {
+					c.props = {
+						...c.props,
+						[name]: numericalValue
+					};
+				}
+			}
 
 			if(onPropChange) {
-				onPropChange(createModel(this), name, previousValue, value);
+				onPropChange(createModel(this), name, previousValue, newValue);
 			}
 
 			queueRender(this);
 		}
 	};
+	// TODO: Add tests to ensure that these prop setters work
+	// set when correct type
+	// don't set when not
+	// take initial values
+	Object.defineProperties(proto, objectMap(spec.props, (_, name) => {
+		return {
+			get() {
+				this._component.props[name];
+			},
+			set(newValue) {
+				const c = this._component;
+				const oldValue = c.props[name];
+				if(typeof oldValue === typeof newValue && newValue !== oldValue) {
+					c.props[name] = newValue;
+					if(onPropChange) {
+						onPropChange(createModel(this), name, previousValue, newValue);
+					}
+					queueRender(this);
+				}
+			}
+		};
+	}));
 
 	if(spec.onMount) {
 		proto.attachedCallback = function() {
