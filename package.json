@@ -14,11 +14,12 @@
     "babel-plugin-transform-react-jsx": "^6.8.0",
     "babel-preset-es2015": "^6.9.0",
     "document-register-element": "^0.5.4",
+    "mocha": "^2.5.3",
     "nop": "^1.0.0",
     "object-assign": "^4.1.0",
     "object-map": "^1.0.2",
     "setimmediate-min": "^1.0.1",
-    "update-element-children": "0.0.7",
+    "update-element-children": "0.1.0",
     "webpack": "^2.1.0-beta.13"
   },
   "dependencies": {},
