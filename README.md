@@ -1,5 +1,7 @@
 # prux
 
+[![Build Status](https://travis-ci.org/download13/prux.svg?branch=master)](https://travis-ci.org/download13/prux)
+
 Create [Web Components](https://customelements.io/) with reducible state (similar to [Redux](https://github.com/reactjs/redux)) and functional views (much like [React](https://facebook.github.io/react/) or [deku](https://github.com/anthonyshort/deku)).
 
 
