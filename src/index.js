@@ -20,7 +20,7 @@ export function registerComponent(name, spec = {}, doc = document) {
 		onPropChange: spec.onPropChange
 	});
 	const elementProto = Object.assign(
-		Object.create(HTMLElement.prototype),
+		Object.create(window.HTMLElement.prototype),
 		componentProto
 	);
 
@@ -86,20 +86,42 @@ function createComponentPrototype(spec) {
 				renderPending: false,
 				previousRender: null,
 				initialProps,
-				props: initialProps,
+				props: {...initialProps},
 				state: reduce(undefined, {type: '_#@init_action'})
 			};
 
-			for(let attr of this.attributes) {
-				const name = attr.name;
+			// TODO: Add tests to ensure that these prop setters work
+			// set when correct type
+			// don't set when not
+			// take initial values
+			Object.defineProperties(this, objectMap(spec.props, (_, name) => {
+				return {
+					get() {
+						return this._component.props[name];
+					},
+					set(newValue) {
+						const c = this._component;
+						const oldValue = c.props[name];
+						if(typeof oldValue === typeof newValue && newValue !== oldValue) {
+							c.props[name] = newValue;
+							if(onPropChange) {
+								onPropChange(createModel(this), name, previousValue, newValue);
+							}
+							queueRender(this);
+						}
+					}
+				};
+			}));
+
+			eachAttributes(this.attributes, (newValue, name) => {
 				const previousValue = c.props[name];
-				const newValue = attr.value;
 				this.attributeChangedCallback(name, previousValue, newValue);
-			}
+			});
 
 			queueRender(this);
 		},
 		attributeChangedCallback(name, previousValue, newValue) {
+			//console.log('attributeChangedCallback', name, previousValue, newValue)
 			// TODO: Test for this new behavior
 			const c = this._component;
 			const typeOfPreviousProp = typeof c.props[name];
@@ -125,28 +147,6 @@ function createComponentPrototype(spec) {
 			queueRender(this);
 		}
 	};
-	// TODO: Add tests to ensure that these prop setters work
-	// set when correct type
-	// don't set when not
-	// take initial values
-	Object.defineProperties(proto, objectMap(spec.props, (_, name) => {
-		return {
-			get() {
-				this._component.props[name];
-			},
-			set(newValue) {
-				const c = this._component;
-				const oldValue = c.props[name];
-				if(typeof oldValue === typeof newValue && newValue !== oldValue) {
-					c.props[name] = newValue;
-					if(onPropChange) {
-						onPropChange(createModel(this), name, previousValue, newValue);
-					}
-					queueRender(this);
-				}
-			}
-		};
-	}));
 
 	if(spec.onMount) {
 		proto.attachedCallback = function() {
@@ -166,8 +166,19 @@ function createComponentPrototype(spec) {
 
 function attributesToProps(attributes) {
 	const props = {};
-	for(let attr of attributes) {
-		props[attr.name] = attr.value;
-	}
+	eachAttributes(attributes, (value, name) => {
+		props[name] = value;
+	});
 	return props;
+}
+
+function eachAttributes(attributes, fn) {
+	const r = [];
+	//console.log('attributes', attributes.length)
+	for(let i = 0; i < attributes.length; i++) {
+		const attr = attributes.item(i);
+		//console.log('attr', attr)
+		r.push(fn(attr.value, attr.name, attributes));
+	}
+	return r;
 }
