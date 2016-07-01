@@ -178,22 +178,29 @@
 	function normalizeChildren(children) {
 	    return children
 	        .filter(nonNull)
-	        .map(normalizeChild);
+	        .reduce(expandItem, [])
+	        .map(normalizeChild)
+	        .map(addIndex);
 	}
 	exports.normalizeChildren = normalizeChildren;
-	function normalizeChild(child, i) {
+	function normalizeChild(child) {
 	    if (typeof child === 'string') {
 	        return {
 	            type: 'text',
-	            text: child,
-	            index: i
+	            text: child
 	        };
 	    }
 	    if (types_1.isVNode(child)) {
-	        child.index = i;
 	        return child;
 	    }
-	    return normalizeChild(child.toString(), i);
+	    return normalizeChild(child.toString());
+	}
+	function expandItem(acc, item) {
+	    return acc.concat(item);
+	}
+	function addIndex(item, i) {
+	    item.index = i;
+	    return item;
 	}
 	function nonNull(a) {
 	    return a != null;
@@ -237,9 +244,9 @@
 	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_object_map__ = __webpack_require__(9);
 	/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_object_map___default = __WEBPACK_IMPORTED_MODULE_3_object_map__ && __WEBPACK_IMPORTED_MODULE_3_object_map__.__esModule ? function() { return __WEBPACK_IMPORTED_MODULE_3_object_map__['default'] } : function() { return __WEBPACK_IMPORTED_MODULE_3_object_map__; };
 	/* harmony import */ __webpack_require__.d(__WEBPACK_IMPORTED_MODULE_3_object_map___default, 'a', __WEBPACK_IMPORTED_MODULE_3_object_map___default);
-	/* harmony export */ exports["a"] = registerComponent;var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	/* harmony export */ exports["a"] = registerComponent;var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -267,7 +274,7 @@
 			onUnmount: spec.onUnmount,
 			onPropChange: spec.onPropChange
 		});
-		var elementProto = Object.assign(Object.create(HTMLElement.prototype), componentProto);
+		var elementProto = Object.assign(Object.create(window.HTMLElement.prototype), componentProto);
 
 		return doc.registerElement(name, { prototype: elementProto });
 	}
@@ -324,6 +331,8 @@
 		// A setter only sets if the type is the same as the existing property
 		var proto = {
 			createdCallback: function createdCallback() {
+				var _this = this;
+
 				var initialProps = spec.props;
 
 
@@ -331,41 +340,42 @@
 					renderPending: false,
 					previousRender: null,
 					initialProps: initialProps,
-					props: initialProps,
+					props: _extends({}, initialProps),
 					state: reduce(undefined, { type: '_#@init_action' })
 				};
 
-				var _iteratorNormalCompletion = true;
-				var _didIteratorError = false;
-				var _iteratorError = undefined;
-
-				try {
-					for (var _iterator = this.attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-						var attr = _step.value;
-
-						var name = attr.name;
-						var _previousValue = c.props[name];
-						var newValue = attr.value;
-						this.attributeChangedCallback(name, _previousValue, newValue);
-					}
-				} catch (err) {
-					_didIteratorError = true;
-					_iteratorError = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion && _iterator.return) {
-							_iterator.return();
+				// TODO: Add tests to ensure that these prop setters work
+				// set when correct type
+				// don't set when not
+				// take initial values
+				Object.defineProperties(this, __WEBPACK_IMPORTED_MODULE_3_object_map___default()(spec.props, function (_, name) {
+					return {
+						get: function get() {
+							return this._component.props[name];
+						},
+						set: function set(newValue) {
+							var c = this._component;
+							var oldValue = c.props[name];
+							if ((typeof oldValue === 'undefined' ? 'undefined' : _typeof(oldValue)) === (typeof newValue === 'undefined' ? 'undefined' : _typeof(newValue)) && newValue !== oldValue) {
+								c.props[name] = newValue;
+								if (onPropChange) {
+									onPropChange(createModel(this), name, previousValue, newValue);
+								}
+								queueRender(this);
+							}
 						}
-					} finally {
-						if (_didIteratorError) {
-							throw _iteratorError;
-						}
-					}
-				}
+					};
+				}));
+
+				eachAttributes(this.attributes, function (newValue, name) {
+					var previousValue = c.props[name];
+					_this.attributeChangedCallback(name, previousValue, newValue);
+				});
 
 				queueRender(this);
 			},
 			attributeChangedCallback: function attributeChangedCallback(name, previousValue, newValue) {
+				//console.log('attributeChangedCallback', name, previousValue, newValue)
 				// TODO: Test for this new behavior
 				var c = this._component;
 				var typeOfPreviousProp = _typeof(c.props[name]);
@@ -385,28 +395,6 @@
 				queueRender(this);
 			}
 		};
-		// TODO: Add tests to ensure that these prop setters work
-		// set when correct type
-		// don't set when not
-		// take initial values
-		Object.defineProperties(proto, __WEBPACK_IMPORTED_MODULE_3_object_map___default()(spec.props, function (_, name) {
-			return {
-				get: function get() {
-					this._component.props[name];
-				},
-				set: function set(newValue) {
-					var c = this._component;
-					var oldValue = c.props[name];
-					if ((typeof oldValue === 'undefined' ? 'undefined' : _typeof(oldValue)) === (typeof newValue === 'undefined' ? 'undefined' : _typeof(newValue)) && newValue !== oldValue) {
-						c.props[name] = newValue;
-						if (onPropChange) {
-							onPropChange(createModel(this), name, previousValue, newValue);
-						}
-						queueRender(this);
-					}
-				}
-			};
-		}));
 
 		if (spec.onMount) {
 			proto.attachedCallback = function () {
@@ -425,32 +413,21 @@
 
 	function attributesToProps(attributes) {
 		var props = {};
-		var _iteratorNormalCompletion2 = true;
-		var _didIteratorError2 = false;
-		var _iteratorError2 = undefined;
-
-		try {
-			for (var _iterator2 = attributes[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-				var attr = _step2.value;
-
-				props[attr.name] = attr.value;
-			}
-		} catch (err) {
-			_didIteratorError2 = true;
-			_iteratorError2 = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion2 && _iterator2.return) {
-					_iterator2.return();
-				}
-			} finally {
-				if (_didIteratorError2) {
-					throw _iteratorError2;
-				}
-			}
-		}
-
+		eachAttributes(attributes, function (value, name) {
+			props[name] = value;
+		});
 		return props;
+	}
+
+	function eachAttributes(attributes, fn) {
+		var r = [];
+		//console.log('attributes', attributes.length)
+		for (var i = 0; i < attributes.length; i++) {
+			var attr = attributes.item(i);
+			//console.log('attr', attr)
+			r.push(fn(attr.value, attr.name, attributes));
+		}
+		return r;
 	}
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).setImmediate))
 
@@ -817,10 +794,30 @@
 
 	var process = module.exports = {};
 
-	// cached from whatever global is present so that test runners that stub it don't break things.
-	var cachedSetTimeout = setTimeout;
-	var cachedClearTimeout = clearTimeout;
+	// cached from whatever global is present so that test runners that stub it
+	// don't break things.  But we need to wrap it in a try catch in case it is
+	// wrapped in strict mode code which doesn't define any globals.  It's inside a
+	// function because try/catches deoptimize in certain engines.
 
+	var cachedSetTimeout;
+	var cachedClearTimeout;
+
+	(function () {
+	  try {
+	    cachedSetTimeout = setTimeout;
+	  } catch (e) {
+	    cachedSetTimeout = function () {
+	      throw new Error('setTimeout is not defined');
+	    }
+	  }
+	  try {
+	    cachedClearTimeout = clearTimeout;
+	  } catch (e) {
+	    cachedClearTimeout = function () {
+	      throw new Error('clearTimeout is not defined');
+	    }
+	  }
+	} ())
 	var queue = [];
 	var draining = false;
 	var currentQueue;
