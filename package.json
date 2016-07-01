@@ -24,7 +24,7 @@
   },
   "dependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "Erin Dachtler <download333@gmail.com>",
   "license": "ISC"
