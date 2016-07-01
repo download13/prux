@@ -1,6 +1,6 @@
 const expect = require('expect.js');
-const registerComponent = require('../dist').registerComponent;
-const jsdom = require('jsdom').jsdom;
+const {registerComponent} = require('../dist');
+const {jsdom} = require('jsdom');
 global.document = jsdom('');
 global.window = document.defaultView;
 global.Text = window.Text;
