@@ -49,12 +49,9 @@ function createComponentPrototype(spec) {
 		const c = element._component;
 		if(!c.renderPending) return;
 
-		const currentRender = render(createModel(element));
-
-		// console.log('updateChildren', c.previousRender, currentRender);
-		updateChildren(element, c.previousRender, currentRender);
-
-		c.previousRender = currentRender;
+		const vdom = render(createModel(element));
+		// console.log('updateChildren', c.previousRender, vdom);
+		c.previousRender = updateChildren(element, c.previousRender, vdom);
 		c.renderPending = false;
 	}
 
