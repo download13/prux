@@ -21,12 +21,13 @@
     "object-assign": "^4.1.0",
     "object-map": "^1.0.2",
     "setimmediate-min": "^1.0.1",
-    "update-element-children": "0.1.0",
+    "update-element-children": "0.1.2",
     "webpack": "^2.1.0-beta.13"
   },
   "dependencies": {},
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "prepublish": "webpack"
   },
   "author": "Erin Dachtler <download333@gmail.com>",
   "license": "ISC"
