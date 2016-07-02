@@ -356,12 +356,9 @@ module.exports =
 			var c = element._component;
 			if (!c.renderPending) return;
 
-			var currentRender = render(createModel(element));
-
-			// console.log('updateChildren', c.previousRender, currentRender);
-			__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_update_element_children__["updateChildren"])(element, c.previousRender, currentRender);
-
-			c.previousRender = currentRender;
+			var vdom = render(createModel(element));
+			// console.log('updateChildren', c.previousRender, vdom);
+			c.previousRender = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_update_element_children__["updateChildren"])(element, c.previousRender, vdom);
 			c.renderPending = false;
 		}
 
@@ -842,6 +839,7 @@ module.exports =
 	    var oldVNodes = h_1.normalizeChildren(util_1.ensureArray(oldChildren));
 	    var newVNodes = h_1.normalizeChildren(util_1.ensureArray(newChildren));
 	    updateChildrenInternal(parentNode, oldVNodes, newVNodes);
+	    return newVNodes;
 	}
 	exports.updateChildren = updateChildren;
 	function updateChildrenInternal(parentNode, oldChildren, newChildren) {
@@ -868,12 +866,10 @@ module.exports =
 	            updateNode(indexNode, oldVNode, newVNode);
 	            break;
 	        case dift_1.MOVE:
-	            var oldNodeMove = parentNode.childNodes[oldVNode.index];
-	            parentNode.insertBefore(updateNode(oldNodeMove, oldVNode, newVNode), indexNode);
+	            parentNode.insertBefore(updateNode(oldVNode.nodeRef, oldVNode, newVNode), indexNode);
 	            break;
 	        case dift_1.REMOVE:
-	            var oldNodeRemove = parentNode.childNodes[oldVNode.index];
-	            parentNode.removeChild(oldNodeRemove);
+	            parentNode.removeChild(oldVNode.nodeRef);
 	            break;
 	    }
 	}
@@ -889,11 +885,13 @@ module.exports =
 	}
 	function updateText(oldNode, newVNode) {
 	    oldNode.textContent = newVNode.text;
+	    newVNode.nodeRef = oldNode;
 	    return oldNode;
 	}
 	function updateElement(oldNode, oldVNode, newVNode) {
 	    updateProps(oldNode, oldVNode.props, newVNode.props);
 	    updateChildrenInternal(oldNode, oldVNode.children, newVNode.children);
+	    newVNode.nodeRef = oldNode;
 	    return oldNode;
 	}
 	function updateProps(element, oldPropsArg, newPropsArg) {
@@ -934,9 +932,12 @@ module.exports =
 	function createDomNode(vnode, doc) {
 	    if (doc === void 0) { doc = document; }
 	    if (types_1.isVTextNode(vnode)) {
-	        return doc.createTextNode(vnode.text);
+	        var textNode = doc.createTextNode(vnode.text);
+	        vnode.nodeRef = textNode;
+	        return textNode;
 	    }
 	    var element = doc.createElement(vnode.name);
+	    vnode.nodeRef = element;
 	    updateProps(element, {}, vnode.props);
 	    vnode.children
 	        .map(function (vnode) { return createDomNode(vnode); })
