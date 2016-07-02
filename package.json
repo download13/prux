@@ -27,7 +27,7 @@
   "dependencies": {},
   "scripts": {
     "test": "mocha",
-    "prepublish": "webpack"
+    "prepublish": "echo ${npm_config_argv} | grep 'install' || webpack"
   },
   "author": "Erin Dachtler <download333@gmail.com>",
   "license": "ISC"
